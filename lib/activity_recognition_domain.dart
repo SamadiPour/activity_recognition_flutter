@@ -38,7 +38,7 @@ Map<String, ActivityType> _activityMap = {
 /// Represents an activity event detected on the phone.
 class ActivityEvent {
   /// The type of activity.
-  ActivityType type;
+  List<ActivityType> types;
 
   /// The confidence of the dection in percentage.
   int confidence;
@@ -46,29 +46,32 @@ class ActivityEvent {
   /// The timestamp when detected.
   late DateTime timeStamp;
 
-  /// The type of activity as a String.
-  String get typeString => type.toString().split('.').last;
-
-  ActivityEvent(this.type, this.confidence) {
+  ActivityEvent(this.types, this.confidence) {
     this.timeStamp = DateTime.now();
   }
 
-  factory ActivityEvent.unknown() => ActivityEvent(ActivityType.UNKNOWN, 100);
+  factory ActivityEvent.unknown() => ActivityEvent([ActivityType.UNKNOWN], 100);
 
   /// Create an [ActivityEvent] based on the string format `type,confidence`.
   factory ActivityEvent.fromString(String string) {
-    List<String> tokens = string.split(",");
+    List<String> tokens = string.split(',');
     if (tokens.length < 2) return ActivityEvent.unknown();
 
-    ActivityType type = ActivityType.UNKNOWN;
-    if (_activityMap.containsKey(tokens.first)) {
-      type = _activityMap[tokens.first]!;
+    final types = <ActivityType>[];
+    for (final type in tokens.first.split('/')) {
+      if (_activityMap.containsKey(type)) {
+        types.add(_activityMap[type]!);
+      }
+    }
+    if (types.isEmpty) {
+      types.add(ActivityType.UNKNOWN);
     }
     int conf = int.tryParse(tokens.last)!;
 
-    return ActivityEvent(type, conf);
+    return ActivityEvent(types, conf);
   }
 
   @override
-  String toString() => 'Activity - type: $typeString, confidence: $confidence%';
+  String toString() =>
+      'Activity - type: ${types.join(' - ')}, confidence: $confidence%';
 }

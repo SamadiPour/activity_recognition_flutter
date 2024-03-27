@@ -75,9 +75,9 @@ class _ActivityRecognitionAppState extends State<ActivityRecognitionApp> {
               itemBuilder: (_, int idx) {
                 final activity = _events[idx];
                 return ListTile(
-                  leading: _activityIcon(activity.type),
+                  leading: _activityIcon(activity.types.first),
                   title: Text(
-                      '${activity.type.toString().split('.').last} (${activity.confidence}%)'),
+                      '${activity.types.first.toString().split('.').last} (${activity.confidence}%)'),
                   trailing: Text(activity.timeStamp
                       .toString()
                       .split(' ')
