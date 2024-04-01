@@ -70,22 +70,25 @@ class _ActivityRecognitionAppState extends State<ActivityRecognitionApp> {
         ),
         body: Center(
           child: ListView.builder(
-              itemCount: _events.length,
-              reverse: true,
-              itemBuilder: (_, int idx) {
-                final activity = _events[idx];
-                return ListTile(
-                  leading: _activityIcon(activity.types.first),
-                  title: Text(
-                      '${activity.types.first.toString().split('.').last} (${activity.confidence}%)'),
-                  trailing: Text(activity.timeStamp
+            itemCount: _events.length,
+            itemBuilder: (_, int idx) {
+              final activity = _events[idx];
+              return ListTile(
+                leading: _activityIcon(activity.types.first),
+                title: Text(
+                  '${activity.types.map((e) => e.name).join(' - ')} (${activity.confidence}%)',
+                ),
+                trailing: Text(
+                  activity.timeStamp
                       .toString()
                       .split(' ')
                       .last
                       .split('.')
-                      .first),
-                );
-              }),
+                      .first,
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
