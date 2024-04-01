@@ -1,6 +1,7 @@
 library activity_recognition;
 
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/services.dart';
 
 part 'activity_recognition_domain.dart';
@@ -12,8 +13,12 @@ part 'activity_recognition_domain.dart';
 class ActivityRecognition {
   static const EventChannel _eventChannel =
       const EventChannel('activity_recognition_flutter');
+  static const MethodChannel methodChannel =
+      MethodChannel('activity_recognition_flutter_method');
+
   Stream<ActivityEvent>? _stream;
   static ActivityRecognition _instance = ActivityRecognition._();
+
   ActivityRecognition._();
 
   /// Get the [ActivityRecognition] singleton.
@@ -32,5 +37,23 @@ class ActivityRecognition {
               (json) => ActivityEvent.fromString(json));
     }
     return _stream!;
+  }
+
+  Future<List<ActivityEvent>> getHistoricalActivities(
+    DateTime fromDate,
+    DateTime toDate,
+  ) async {
+    if (!Platform.isIOS) {
+      throw UnsupportedError('This feature is only available on iOS.');
+    }
+
+    final activities = await methodChannel.invokeMethod<List>(
+      'getHistoricalActivities',
+      {
+        'fromDate': fromDate.millisecondsSinceEpoch,
+        'toDate': toDate.millisecondsSinceEpoch,
+      },
+    );
+    return activities?.map((e) => ActivityEvent.fromString(e)).toList() ?? [];
   }
 }

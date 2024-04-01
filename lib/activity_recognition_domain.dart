@@ -40,23 +40,26 @@ class ActivityEvent {
   /// The type of activity.
   List<ActivityType> types;
 
-  /// The confidence of the dection in percentage.
+  /// The confidence of the detection in percentage.
   int confidence;
 
   /// The timestamp when detected.
-  late DateTime timeStamp;
+  DateTime timeStamp;
 
-  ActivityEvent(this.types, this.confidence) {
-    this.timeStamp = DateTime.now();
-  }
+  ActivityEvent(this.types, this.confidence, this.timeStamp);
 
-  factory ActivityEvent.unknown() => ActivityEvent([ActivityType.UNKNOWN], 100);
+  factory ActivityEvent.unknown() => ActivityEvent(
+        [ActivityType.UNKNOWN],
+        100,
+        DateTime.now(),
+      );
 
   /// Create an [ActivityEvent] based on the string format `type,confidence`.
   factory ActivityEvent.fromString(String string) {
     List<String> tokens = string.split(',');
     if (tokens.length < 2) return ActivityEvent.unknown();
 
+    /// Example -> UNKNOWN/WALKING or WALKING
     final types = <ActivityType>[];
     for (final type in tokens.first.split('/')) {
       if (_activityMap.containsKey(type)) {
@@ -66,12 +69,18 @@ class ActivityEvent {
     if (types.isEmpty) {
       types.add(ActivityType.UNKNOWN);
     }
-    int conf = int.tryParse(tokens.last)!;
 
-    return ActivityEvent(types, conf);
+    /// Example -> 100
+    final conf = int.tryParse(tokens[1])!;
+
+    /// Example -> 2024-03-31 16:59:46 +0000
+    final dateString = tokens.length >= 3 ? tokens[2] : '';
+    final date = DateTime.tryParse(dateString)?.toLocal() ?? DateTime.now();
+
+    return ActivityEvent(types, conf, date);
   }
 
   @override
   String toString() =>
-      'Activity - type: ${types.join(' - ')}, confidence: $confidence%';
+      'Activity - type: ${types.join(' - ')}, confidence: $confidence%, TimeStamp: $timeStamp';
 }
